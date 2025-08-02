@@ -43,10 +43,12 @@ You can see the live application here: [Aura E-Commerce](https://your-vercel-url
 
 
 ### AI Stylist Interface
-![AI Stylist](https://via.placeholder.com/800x400?text=AI+Stylist+Screenshot)
+<img width="1872" height="893" alt="image" src="https://github.com/user-attachments/assets/7e31461a-5c6f-41e7-8929-b25a4ce3b3db" />
+
 
 ### Product Catalog
-![Shop Page](https://via.placeholder.com/800x400?text=Shop+Page+Screenshot)
+<img width="1877" height="875" alt="image" src="https://github.com/user-attachments/assets/c13083be-dea1-4679-9343-245796ff6539" />
+
 
 ## Technology Stack
 
