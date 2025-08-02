@@ -38,7 +38,8 @@ You can see the live application here: [Aura E-Commerce](https://your-vercel-url
 ## 📸 Screenshots
 
 ### Home Page
-![Home Page](<img width="1907" height="822" alt="image" src="https://github.com/user-attachments/assets/ae3be48c-8b79-45c4-9536-5a6ecdc40738" />)
+<img width="1907" height="822" alt="image" src="https://github.com/user-attachments/assets/f66d5623-4643-46f0-80f1-b20c7dcb228c" />
+
 
 
 ### AI Stylist Interface
