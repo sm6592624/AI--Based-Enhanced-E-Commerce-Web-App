@@ -1,3 +1,8 @@
+---
+title: "SKILL.md — AI-Based Enhanced E-Commerce Web App (Aura)"
+description: "Skills & technologies mapped to code evidence for the Aura e-commerce React SPA."
+---
+
 # SKILL.md — AI-Based Enhanced E-Commerce Web App (Aura)
 
 This document maps the **skills & technologies** used in this repository to **specific code locations** (evidence) and summarizes architecture.
