@@ -1,255 +1,294 @@
 ---
-title: "SKILL.md — AI-Based Enhanced E-Commerce Web App (Aura)"
-description: "Skills & technologies mapped to code evidence for the Aura e-commerce React SPA."
+title: "Aura — Skills & Technologies → Code Evidence Map"
+description: >
+  USE THIS SKILL whenever you need to understand, modify, review, or explain the
+  Aura (AI-Based Enhanced E-Commerce Web App) React SPA.  It maps every skill
+  and technology to the exact source files that prove it, describes feature flows
+  step-by-step, and flags known gaps.  Reach for it before reading raw code.
+last_verified_commit: "e828ce7"
+last_verified_date: "2026-04-15"
 ---
 
-# SKILL.md — AI-Based Enhanced E-Commerce Web App (Aura)
+# Aura — Skills & Technologies → Code Evidence Map
 
-This document maps the **skills & technologies** used in this repository to **specific code locations** (evidence) and summarizes architecture.
+> **One-liner:** A React 19 SPA (Create React App) that demo's an AI-powered
+> personal stylist, full e-commerce shopping flow, and prototype auth — all
+> backed by mock data with optional live OpenAI / Unsplash integration.
 
 ---
 
-## Repository Snapshot (What the code shows)
+## Table of Contents
 
-| Area | Observed Implementation |
+1. [Repository Snapshot](#1-repository-snapshot)
+2. [Architecture Diagram](#2-architecture-diagram)
+3. [Tech Stack Evidence Table](#3-tech-stack-evidence-table)
+4. [Skills → Evidence Matrix](#4-skills--evidence-matrix)
+5. [Feature Flows](#5-feature-flows)
+   - [AI Stylist Flow](#a-ai-stylist-flow)
+   - [Shopping Flow](#b-shopping-flow)
+   - [Auth Flow](#c-auth-flow)
+6. [Environment Variables](#6-environment-variables)
+7. [Known Gaps & Risks](#7-known-gaps--risks)
+8. [Suggested Next Steps](#8-suggested-next-steps)
+9. [Mini Eval Prompts](#9-mini-eval-prompts)
+
+---
+
+## 1. Repository Snapshot
+
+| Dimension | Value |
 |---|---|
-| App Type | Frontend SPA (React + Create React App) |
-| Routing | React Router (`src/App.js`) |
-| Styling | Tailwind CSS (config present + utility classes throughout components/pages) |
-| State Management | React Context for cart/auth (`src/context/*`) |
-| Data Source | Static mock data (`src/data/products.js`, `src/data/mockData.js`) |
-| “AI Feature” | AI Stylist page calls OpenAI endpoint or uses mock data (`src/pages/AiStylistPage.js`, `src/config/env.js`) |
-| Persistence | `localStorage` for user/cart (`AuthContext`, `CartContext`) |
-| Deployment | Vercel (`vercel.json`, README homepage link) |
+| **App type** | Client-side SPA (React 19 + Create React App) |
+| **Entry point** | `src/index.js` → `src/App.js` |
+| **Routing** | `react-router-dom` v7 — nine routes (`src/App.js`) |
+| **Styling** | Tailwind CSS 3 + PostCSS + Autoprefixer |
+| **State management** | React Context API (`src/context/AuthContext.js`, `src/context/CartContext.js`) |
+| **Data layer** | Static mock catalogues (`src/data/products.js`, `src/data/mockData.js`) |
+| **AI feature** | AI Stylist — calls OpenAI Vision API or falls back to mock (`src/pages/AiStylistPage.js`) |
+| **Image service** | Optional Unsplash API with fallback utilities (`src/config/env.js`, `src/utils/imageUtils.js`) |
+| **Persistence** | `localStorage` (`aura_user`, `aura_users`, `aura_cart`) |
+| **Testing** | React Testing Library + Jest DOM (`src/setupTests.js`, `src/App.test.js`) |
+| **Deployment** | Vercel (`vercel.json`, `package.json` `vercel-build` script) |
 
 ---
 
-## 1) Architecture Infographic (High-level)
+## 2. Architecture Diagram
 
 ```text
-                 ┌─────────────────────────────────────┐
-                 │            React SPA (CRA)           │
-                 │         src/index.js → App.js        │
-                 └─────────────────────────────────────┘
-                                  │
-                                  ▼
-        ┌───────────────────────────────────────────────────────┐
-        │                   Routing (React Router)              │
-        │  /  /shop  /product/:id  /search  /checkout  /profile │
-        │  /ai-stylist  /trends  /order-confirmation            │
-        └───────────────────────────────────────────────────────┘
-                 │                          │
-                 │                          │
-                 ▼                          ▼
-   ┌──────────────────────────┐   ┌─────────────────────────────┐
-   │  Context: Auth + Cart     │   │   Data Layer (Mock Data)     │
-   │ AuthContext: localStorage │   │ products.js, mockData.js     │
-   │ CartContext: localStorage │   └─────────────────────────────┘
-   └──────────────────────────┘
-                 │
-                 ▼
-   ┌─────────────────────────────────────────────────────────────┐
-   │ AI Stylist (Prototype)                                      │
-   │ - Upload image (base64)                                     │
-   │ - If env keys missing => mock recommendations               │
-   │ - Else => POST OpenAI chat/completions (vision model prompt)│
-   └─────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────┐
+│                     React SPA (CRA)                        │
+│                 src/index.js  →  src/App.js                │
+└──────────────────────────┬─────────────────────────────────┘
+                           │
+                           ▼
+┌────────────────────────────────────────────────────────────┐
+│                  Routing (react-router-dom)                 │
+│  /  /shop  /product/:id  /search  /trends  /ai-stylist     │
+│  /profile  /checkout  /order-confirmation                  │
+└────────┬──────────────────────────────┬────────────────────┘
+         │                              │
+         ▼                              ▼
+┌─────────────────────────┐  ┌──────────────────────────────┐
+│  Context Providers       │  │  Data Layer (mock)            │
+│  AuthContext → localStorage│  │  src/data/products.js         │
+│  CartContext → localStorage│  │  src/data/mockData.js         │
+└────────┬────────────────┘  └──────────────────────────────┘
+         │
+         ▼
+┌────────────────────────────────────────────────────────────┐
+│  AI Stylist (prototype)                                     │
+│  • Upload image (base64, ≤ 5 MB)                            │
+│  • Env keys present → POST OpenAI chat/completions (Vision) │
+│  • Env keys absent  → mock recommendations from mockData.js │
+└────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌────────────────────────────────────────────────────────────┐
+│  Vercel (deployment)                                        │
+│  vercel.json  •  SPA fallback to /index.html                │
+└────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2) Tech Stack Table (from package.json + code)
+## 3. Tech Stack Evidence Table
 
-| Category | Technology | Evidence |
-|---|---|---|
-| Frontend Framework | React 19 | `package.json`, `src/index.js` |
-| Routing | react-router-dom | `package.json`, `src/App.js` |
-| Styling | TailwindCSS + PostCSS + Autoprefixer | `tailwind.config.js`, `postcss.config.js`, Tailwind utility classes in pages/components |
-| UI Components | Headless UI, Heroicons | `package.json` |
-| Testing | React Testing Library + Jest DOM | `package.json`, `src/setupTests.js`, `src/App.test.js` |
-| Deployment | Vercel | `vercel.json`, repo homepage points to Vercel |
-| AI/API (prototype) | OpenAI API call from client | `src/pages/AiStylistPage.js` |
-| Images | Unsplash key support + image fallback utilities | `src/config/env.js`, `src/utils/imageUtils.js`, `test-unsplash*.js` |
-
----
-
-## 3) Skills-to-Code Evidence Matrix (Structured)
-
-| Skill | What it looks like in this repo | Evidence (files) |
-|---|---|---|
-| SPA Architecture | Single-page app entry + root render | `src/index.js` |
-| Client-side Routing | Multiple pages via `<Routes>` / `<Route>` | `src/App.js` |
-| Component-based UI | Reusable UI components (header/footer/product cards/cart sidebar/toast) | `src/components/Header.js`, `src/components/Footer.js`, `src/components/ProductCard.js`, `src/components/CartSidebar.js`, `src/components/Toast.js` |
-| State Management (Context API) | Global auth + cart providers wrapping the app | `src/App.js`, `src/context/AuthContext.js`, `src/context/CartContext.js` |
-| Persistence (localStorage) | Remember user + cart across refresh | `src/context/AuthContext.js` (`aura_user`, `aura_users`), `src/context/CartContext.js` (`aura_cart`) |
-| Auth UX (prototype) | Login/register simulated; profile/wishlist available | `src/context/AuthContext.js`, `src/components/auth/*`, `src/pages/ProfilePage.js` |
-| E-Commerce Flows | Browse, filter, search, cart, checkout, order confirmation | `src/pages/ShopPage.js`, `src/pages/SearchPage.js`, `src/components/CartSidebar.js`, `src/pages/CheckoutPage.js`, `src/pages/OrderConfirmationPage.js` |
-| Filtering & Sorting | Category + price range + sorting logic | `src/pages/ShopPage.js`, `src/pages/SearchPage.js` |
-| AI Feature Integration | Upload image + send prompt with preferences; fallback to mock | `src/pages/AiStylistPage.js`, `src/config/env.js`, `src/data/mockData.js` |
-| Environment Config | Reads env vars + validates in production | `src/config/env.js`, `src/utils/debug.js` |
-| Defensive Programming | Checks for missing product fields before adding to cart, safe array handling | `src/components/ProductCard.js`, `src/context/CartContext.js` |
-| UI Responsiveness | Tailwind responsive classes + mobile menu | `src/components/Header.js`, pages using `md:`/`lg:` layouts |
-| Deployment Readiness | Vercel build script + config | `package.json` (`vercel-build`), `vercel.json` |
+| Category | Technology | Version / Config | Evidence |
+|---|---|---|---|
+| Frontend framework | React | 19.1 | `package.json`, `src/index.js` |
+| Routing | react-router-dom | 7.7 | `package.json`, `src/App.js` |
+| Styling | Tailwind CSS | 3.4 | `tailwind.config.js`, `postcss.config.js`, utility classes in components/pages |
+| UI primitives | Headless UI | 2.2 | `package.json` |
+| Icons | Heroicons | 2.2 | `package.json`, `src/assets/icons.js` |
+| Testing | React Testing Library + Jest DOM | 16.3 / 6.6 | `package.json`, `src/setupTests.js`, `src/App.test.js` |
+| Build tooling | Create React App (react-scripts) | 5.0 | `package.json` |
+| AI integration | OpenAI API (client-side fetch) | — | `src/pages/AiStylistPage.js` |
+| Image service | Unsplash API (optional) | — | `src/config/env.js`, `src/utils/imageUtils.js` |
+| Deployment | Vercel | v2 config | `vercel.json`, `package.json` (`vercel-build`) |
 
 ---
 
-## 4) Flow Diagrams + Step Tables
+## 4. Skills → Evidence Matrix
 
-### A) AI Stylist Flow (Image → Env Validation → OpenAI or Mock → UI)
+| Skill | Manifestation in Repo | Key Files |
+|---|---|---|
+| **SPA architecture** | Single entry point, client-side rendering | `src/index.js`, `src/App.js` |
+| **Client-side routing** | Declarative `<Routes>` / `<Route>` for nine pages | `src/App.js` |
+| **Component-based UI** | Reusable Header, Footer, ProductCard, CartSidebar, Toast | `src/components/Header.js`, `src/components/Footer.js`, `src/components/ProductCard.js`, `src/components/CartSidebar.js`, `src/components/Toast.js` |
+| **State management (Context API)** | `AuthProvider` + `CartProvider` wrap the app | `src/context/AuthContext.js`, `src/context/CartContext.js`, `src/App.js` |
+| **Persistence (localStorage)** | Cart (`aura_cart`), user session (`aura_user`), user registry (`aura_users`) | `src/context/CartContext.js`, `src/context/AuthContext.js` |
+| **Auth UX (prototype)** | Modal login/register with simulated delay; profile & wishlist | `src/components/auth/AuthModal.js`, `src/components/auth/LoginForm.js`, `src/components/auth/RegisterForm.js`, `src/pages/ProfilePage.js` |
+| **E-commerce flows** | Browse → filter → search → cart → checkout → confirmation | `src/pages/ShopPage.js`, `src/pages/SearchPage.js`, `src/components/CartSidebar.js`, `src/pages/CheckoutPage.js`, `src/pages/OrderConfirmationPage.js` |
+| **Filtering & sorting** | Category, price range, sort order via `useMemo` | `src/pages/ShopPage.js`, `src/pages/SearchPage.js` |
+| **AI feature integration** | Image upload → OpenAI Vision prompt; graceful mock fallback | `src/pages/AiStylistPage.js`, `src/config/env.js`, `src/data/mockData.js` |
+| **Environment configuration** | Central config with dev/prod validation | `src/config/env.js`, `src/utils/debug.js` |
+| **Defensive programming** | Field validation before cart add; safe array checks | `src/components/ProductCard.js`, `src/context/CartContext.js` |
+| **Responsive design** | Tailwind responsive utilities (`md:`, `lg:`), mobile menu | `src/components/Header.js`, layout classes across pages |
+| **Custom hooks** | Router preload hook (currently disabled for debugging) | `src/hooks/useRouterPreload.js` |
+| **Deployment readiness** | Vercel SPA config with static asset caching | `vercel.json`, `package.json` |
 
-#### Infographic (AI Stylist)
+---
+
+## 5. Feature Flows
+
+### A) AI Stylist Flow
+
+**Path:** User uploads image → env validation → OpenAI call _or_ mock → UI renders recommendations.
 
 ```text
 User
- │
- │ 1) Upload image (<= 5MB)  ────────────────┐
- ▼                                            │
-AiStylistPage (state: image, preferences, ...)│
-src/pages/AiStylistPage.js                    │
- │                                            │
- │ 2) on mount: debugConfig + validateConfig   │
- │    - show config error only if prod & missing
+ │  1) Upload image (≤ 5 MB)
+ ▼
+AiStylistPage  ──── src/pages/AiStylistPage.js
+ │  2) useEffect → debugConfig() + validateConfig()
  ▼
 config/env.js + utils/debug.js
- │
- │ 3) "Get Style Recommendations" click
+ │  3) Click "Get Style Recommendations"
  ▼
-Decision:
- ├─ If (useMockData || !openaiApiKey) ─────────────► setRecommendations(mockAIRecommendations)
- │                                                   usingMockData=true
- │                                                   (Demo mode banner)
- │
- └─ Else: fetch OpenAI chat/completions
-        - model: "gpt-4-vision-preview"
-        - sends text prompt + image_url(base64 data URL)
-        - parses response.choices[0].message.content
-        - fallback to mock on error
-                     │
-                     ▼
-Recommendations UI (rendered list)
+Decision
+ ├─ useMockData || !openaiApiKey ──► mock recommendations (mockData.js)
+ │                                   Demo-mode banner shown
+ └─ Else ──► fetch OpenAI chat/completions (gpt-4-vision-preview)
+              Parse response → setRecommendations
+              On error → fallback to mock
 ```
 
-#### Structured table (AI Stylist Steps → Evidence)
-
-| Step | What happens | Key logic (functions/state) | Evidence |
+| Step | Action | Logic / State | Evidence |
 |---:|---|---|---|
-| 1 | User uploads an image | `handleImageUpload`, `FileReader`, size check `5MB` | `src/pages/AiStylistPage.js` |
-| 2 | Env/debug runs on mount | `React.useEffect`, `debugConfig()`, `validateConfig()` | `src/pages/AiStylistPage.js`, `src/utils/debug.js`, `src/config/env.js` |
-| 3 | Decide mock vs real | `if (config.useMockData || !config.openaiApiKey)` | `src/pages/AiStylistPage.js`, `src/config/env.js` |
-| 4 | Real OpenAI call | `fetch('https://api.openai.com/v1/chat/completions')` + bearer token | `src/pages/AiStylistPage.js` |
-| 5 | Parse and render | `setRecommendations([recommendation])` then map in JSX | `src/pages/AiStylistPage.js` |
-| 6 | Error fallback | catch → set error msg → use `mockAIRecommendations` | `src/pages/AiStylistPage.js`, `src/data/mockData.js` |
+| 1 | Upload image | `handleImageUpload`, `FileReader`, 5 MB size check | `src/pages/AiStylistPage.js` |
+| 2 | Validate env on mount | `useEffect` → `debugConfig()`, `validateConfig()` | `src/pages/AiStylistPage.js`, `src/utils/debug.js`, `src/config/env.js` |
+| 3 | Decide mock vs live | `config.useMockData` or `!config.openaiApiKey` | `src/pages/AiStylistPage.js`, `src/config/env.js` |
+| 4 | Call OpenAI (live path) | `fetch('https://api.openai.com/v1/chat/completions')` + bearer token | `src/pages/AiStylistPage.js` |
+| 5 | Render results | `setRecommendations([…])` mapped in JSX | `src/pages/AiStylistPage.js` |
+| 6 | Error fallback | `catch` → error message → `mockAIRecommendations` | `src/pages/AiStylistPage.js`, `src/data/mockData.js` |
 
 ---
 
-### B) Shopping Flow (Filters → Product Card → Add to Cart → Sidebar → Checkout → Confirmation)
+### B) Shopping Flow
 
-#### Infographic (Shopping)
+**Path:** Browse catalogue → filter/sort → add to cart → sidebar → checkout → confirmation.
 
 ```text
-ShopPage
-src/pages/ShopPage.js
-  │
-  │ 1) Load products from mock data
-  │    - allProductsData
-  ▼
-Filter/Sort pipeline (useMemo)
-  - category filter
-  - price filter
-  - sorting (price asc/desc or default)
-  │
-  │ 2) Render ProductCard grid
-  ▼
-ProductCard
-src/components/ProductCard.js
-  │
-  │ 3) Add to cart button
-  │    - validates required fields
-  ▼
-CartContext.addToCart
-src/context/CartContext.js
-  │
-  │ 4) Update state + persist to localStorage ("aura_cart")
-  │ 5) Open Cart sidebar after delay (setIsCartOpen(true))
-  ▼
-CartSidebar
-src/components/CartSidebar.js
-  │
-  │ 6) Update quantity / remove
-  │ 7) Proceed to /checkout
-  ▼
+ShopPage  ──── src/pages/ShopPage.js
+ │  1) Import allProductsData
+ ▼
+Filter / Sort pipeline (useMemo)
+ │  2) Render ProductCard grid
+ ▼
+ProductCard  ──── src/components/ProductCard.js
+ │  3) Add-to-cart (validates id/name/price)
+ ▼
+CartContext.addToCart  ──── src/context/CartContext.js
+ │  4) Merge quantities, persist to localStorage ("aura_cart")
+ │  5) Open CartSidebar after short delay
+ ▼
+CartSidebar  ──── src/components/CartSidebar.js
+ │  6) Adjust quantity / remove items
+ │  7) Navigate to /checkout
+ ▼
 CheckoutPage → OrderConfirmationPage
-src/pages/CheckoutPage.js / src/pages/OrderConfirmationPage.js
 ```
 
-#### Structured table (Shopping Steps → Evidence)
-
-| Step | What happens | Key logic | Evidence |
+| Step | Action | Logic | Evidence |
 |---:|---|---|---|
-| 1 | Load product catalog | `allProductsData` import | `src/pages/ShopPage.js`, `src/data/products.js` |
-| 2 | Filter + sort + paginate | `useMemo` for filtered list; pagination state | `src/pages/ShopPage.js` |
-| 3 | Add-to-cart from card | `handleAddToCart` validates `id/name/price`, calls `addToCart` | `src/components/ProductCard.js` |
-| 4 | Cart update logic | Ensures array safety; merges quantities; constructs cart item shape | `src/context/CartContext.js` |
-| 5 | Persist cart | `useEffect` saves `aura_cart` | `src/context/CartContext.js` |
-| 6 | Sidebar UI | Renders items, subtotal, quantity changes | `src/components/CartSidebar.js` |
-| 7 | Checkout navigation | `<Link to="/checkout">` | `src/components/CartSidebar.js`, routes in `src/App.js` |
-| 8 | Route-level integration | Routes include shop/product/checkout/confirm | `src/App.js` |
+| 1 | Load catalogue | `allProductsData` import | `src/pages/ShopPage.js`, `src/data/products.js` |
+| 2 | Filter + sort + paginate | `useMemo` pipeline; pagination state | `src/pages/ShopPage.js` |
+| 3 | Add to cart | `handleAddToCart` validates required fields → `addToCart` | `src/components/ProductCard.js` |
+| 4 | Cart state update | Array safety checks; quantity merge; cart item shape | `src/context/CartContext.js` |
+| 5 | Persist cart | `useEffect` → `localStorage.setItem('aura_cart', …)` | `src/context/CartContext.js` |
+| 6 | Sidebar UI | Renders items, subtotal, quantity controls | `src/components/CartSidebar.js` |
+| 7 | Checkout navigation | `<Link to="/checkout">` | `src/components/CartSidebar.js`, `src/App.js` |
+| 8 | Order confirmation | Route renders confirmation page | `src/pages/CheckoutPage.js`, `src/pages/OrderConfirmationPage.js` |
 
 ---
 
-### C) Auth Flow (Register/Login Modal → localStorage → Session → Wishlist/Logout)
+### C) Auth Flow
 
-#### Infographic (Auth)
+**Path:** Header icon → modal (login/register) → localStorage session → profile/wishlist.
 
 ```text
-Header (top nav)
-src/components/Header.js
-  │
-  │ Click user icon
-  ▼
-Decision (useAuth):
-  ├─ Not authenticated → open AuthModal
-  │       src/components/auth/AuthModal (dir exists)
-  │
-  └─ Authenticated → show dropdown
-          - Profile / Wishlist / Logout
-                  │
-                  ▼
-AuthContext
-src/context/AuthContext.js
-  │
-  │ register/login simulate async delay
-  │ save users list to localStorage: "aura_users"
-  │ save current user to localStorage: "aura_user"
-  ▼
-App-wide session
-(AuthProvider wraps App)
-src/App.js
+Header  ──── src/components/Header.js
+ │  Click user icon
+ ▼
+Decision (useAuth)
+ ├─ Not authenticated → AuthModal  ──── src/components/auth/AuthModal.js
+ │       LoginForm / RegisterForm
+ └─ Authenticated → dropdown (Profile / Wishlist / Logout)
+ ▼
+AuthContext  ──── src/context/AuthContext.js
+ │  register/login → simulated async delay
+ │  Persist: "aura_users" (registry), "aura_user" (session)
+ ▼
+App-wide session  (AuthProvider wraps App in src/App.js)
 ```
 
-#### Structured table (Auth Steps → Evidence)
-
-| Step | What happens | Key logic | Evidence |
+| Step | Action | Logic | Evidence |
 |---:|---|---|---|
-| 1 | Provider wraps app | `<AuthProvider>` wraps routes | `src/App.js` |
-| 2 | Load session on startup | Reads `localStorage.getItem('aura_user')` | `src/context/AuthContext.js` |
-| 3 | Register | Simulated delay; stores user in `aura_users`; sets `user` | `src/context/AuthContext.js` |
-| 4 | Login | Simulated delay; validates against `aura_users`; sets `user` | `src/context/AuthContext.js` |
-| 5 | Persist user | `useEffect` writes/removes `aura_user` when `user` changes | `src/context/AuthContext.js` |
-| 6 | Wishlist toggle | `addToWishlist(productId)` updates profile | `src/context/AuthContext.js`, used by `src/components/ProductCard.js` |
-| 7 | Header behavior | Not logged in opens modal; logged in shows dropdown + logout | `src/components/Header.js` |
+| 1 | Provider wraps app | `<AuthProvider>` around routes | `src/App.js` |
+| 2 | Restore session | `localStorage.getItem('aura_user')` on mount | `src/context/AuthContext.js` |
+| 3 | Register | Simulated delay → store in `aura_users` → set `user` | `src/context/AuthContext.js` |
+| 4 | Login | Simulated delay → validate against `aura_users` → set `user` | `src/context/AuthContext.js` |
+| 5 | Persist user | `useEffect` writes/removes `aura_user` | `src/context/AuthContext.js` |
+| 6 | Wishlist toggle | `addToWishlist(productId)` updates user profile | `src/context/AuthContext.js`, `src/components/ProductCard.js` |
+| 7 | Header behaviour | Unauthenticated → modal; authenticated → dropdown + logout | `src/components/Header.js` |
 
 ---
 
-## 5) Environment Variables (as implemented)
+## 6. Environment Variables
 
-Expected client env vars (Create React App style):
+All variables follow Create React App's `REACT_APP_` prefix convention.
 
-```env
-REACT_APP_OPENAI_API_KEY=...
-REACT_APP_UNSPLASH_API_KEY=...
-REACT_APP_API_BASE_URL=http://localhost:3001/api
-REACT_APP_USE_MOCK_DATA=true
-```
+| Variable | Required | Default | Purpose | Evidence |
+|---|---|---|---|---|
+| `REACT_APP_OPENAI_API_KEY` | No* | — | Enables live AI Stylist calls | `src/config/env.js` |
+| `REACT_APP_UNSPLASH_API_KEY` | No* | — | Enables live product images | `src/config/env.js`, `src/utils/imageUtils.js` |
+| `REACT_APP_API_BASE_URL` | No | `http://localhost:3001/api` | Backend API root (unused in prototype) | `src/config/env.js` |
+| `REACT_APP_USE_MOCK_DATA` | No | `true` when Unsplash key absent | Force mock-data mode | `src/config/env.js` |
 
-Evidence: `src/config/env.js`, `src/utils/debug.js`
+> \* When both API keys are absent the app runs fully in **demo mode** with
+> mock data.  In production (`NODE_ENV=production`), `validateConfig()` logs
+> errors for missing keys and throws — so they are effectively **required in
+> production** but optional during local development.
+
+Reference template: `.env.example`
+
+---
+
+## 7. Known Gaps & Risks
+
+> ⚠️ This is a **prototype / portfolio project**, not production-hardened.
+
+| Area | Gap | Impact |
+|---|---|---|
+| **Security** | OpenAI API key exposed to the browser (`src/pages/AiStylistPage.js` sends it in a client-side `fetch`) | Key can be extracted from DevTools; should proxy through a backend |
+| **Auth** | No real backend; passwords stored in plain-text `localStorage` | Not suitable for real users |
+| **Payments** | Checkout collects form data but performs no payment processing | Order confirmation is cosmetic |
+| **Testing** | Only a default CRA smoke test exists (`src/App.test.js`) | Low coverage; regressions possible |
+| **Backend** | `REACT_APP_API_BASE_URL` is configured but no backend server exists in this repo | API calls (if any beyond OpenAI) would fail |
+| **Accessibility** | No explicit ARIA audit; relies on Headless UI defaults | May not meet WCAG 2.1 AA |
+| **SEO** | Client-rendered SPA with no SSR or meta-tag management | Limited discoverability |
+
+---
+
+## 8. Suggested Next Steps
+
+1. **Move API keys server-side** — add a small Express/Vercel-serverless proxy so secrets never reach the browser.
+2. **Add real auth** — integrate an identity provider (e.g. Firebase Auth, Auth0) to replace `localStorage` passwords.
+3. **Expand test coverage** — unit tests for Context reducers, integration tests for shopping & auth flows.
+4. **Accessibility audit** — run axe-core or Lighthouse and fix flagged issues.
+5. **Payment integration** — wire Stripe or a similar provider into the checkout flow.
+6. **SSR / meta tags** — consider Next.js migration or `react-helmet` for SEO.
+
+---
+
+## 9. Mini Eval Prompts
+
+Use these prompts to quickly verify understanding of the codebase:
+
+| # | Prompt | Expected answer touches |
+|---|---|---|
+| 1 | _"How does the AI Stylist decide whether to call OpenAI or use mock data?"_ | `src/config/env.js` `useMockData` flag, `src/pages/AiStylistPage.js` conditional branch |
+| 2 | _"Trace what happens when a user clicks 'Add to Cart' on a product card."_ | `src/components/ProductCard.js` validation → `CartContext.addToCart` → `localStorage` persist → `CartSidebar` opens |
+| 3 | _"Where are user credentials stored and why is that a risk?"_ | `localStorage` keys `aura_user` / `aura_users` in `src/context/AuthContext.js`; plain-text, client-side only |
+| 4 | _"What would you change first to make this production-ready?"_ | Move OpenAI key behind a backend proxy; replace localStorage auth; add tests |
+| 5 | _"Which environment variables does the app read and what happens if they are all missing?"_ | Four `REACT_APP_*` vars in `src/config/env.js`; app falls back to demo/mock mode in dev, throws in production |
